@@ -1,0 +1,75 @@
+[
+  {
+    "id": "r1-error-endpoint-callers",
+    "question": "How many callers point at the endpoint that the error catalogue attributes signature 538658668f to? Answer with the number and the endpoint.",
+    "files": [
+      "docs/ERRORS.md",
+      "docs/SERVICE-MAP.md"
+    ],
+    "expect": "3"
+  },
+  {
+    "id": "r2-statements-recordings",
+    "question": "Which endpoint issues 4 SQL statements, and how many golden recordings exist for it?",
+    "files": [
+      "docs/ENDPOINT-DB.md",
+      "docs/API.md"
+    ],
+    "expect": "(?i)customers/\\{id\\}"
+  },
+  {
+    "id": "r3-finding-vs-signature",
+    "question": "Does any finding link to signature 538658668f? Answer no or yes, name the exception, and say what the evidence supports.",
+    "files": [
+      "docs/FINDINGS.md",
+      "docs/ERRORS.md"
+    ],
+    "expect": "(?i)(no finding|none|not supported|no evidence|no link|nothing links)"
+  },
+  {
+    "id": "r4-p50-vs-max",
+    "question": "For GET /api/customers/{id}, how many times slower is the maximum span than the p50, rounded to a whole number?",
+    "files": [
+      "docs/SPANS.md"
+    ],
+    "derived": true,
+    "expect": "\\b6[01]\\b"
+  },
+  {
+    "id": "r5-dead-class-finding",
+    "question": "Which class is dead code, and which finding number names it?",
+    "files": [
+      "docs/INVENTORY.md",
+      "docs/FINDINGS.md"
+    ],
+    "expect": "\\b6\\b"
+  },
+  {
+    "id": "r6-lines-before-gate-fails",
+    "question": "The coverage floor is 80% of 120 lines and coverage is currently 107 of 120. How many more lines may lose coverage before the gate fails?",
+    "files": [
+      "README.md"
+    ],
+    "derived": true,
+    "expect": "\\b11\\b"
+  },
+  {
+    "id": "r7-findings-citing-db-map",
+    "question": "How many findings cite docs/ENDPOINT-DB.md as their evidence? Name them.",
+    "files": [
+      "docs/FINDINGS.md",
+      "docs/ENDPOINT-DB.md"
+    ],
+    "expect": "\\b2\\b"
+  },
+  {
+    "id": "r8-endpoints-with-two-statements",
+    "question": "How many endpoints in the SQL map carry at least 2 statements?",
+    "files": [
+      "docs/ENDPOINT-DB.md",
+      "docs/API.md"
+    ],
+    "derived": true,
+    "expect": "\\b3\\b"
+  }
+]

@@ -90,3 +90,77 @@ most expensive possible response.
   I cannot state is not a measurement.
 - Cost per successful task is not value per successful task. A $0.0002 answer to a
   question nobody needed costs more than no answer at all.
+
+---
+
+# Part 2: the same measurement where the prompt is real files
+
+Part 1 shipped the facts inside the prompt, which is the easy case. Part 2 gives the loop
+only a question and **file paths from a real repository**: the prompt is the file content,
+up to a 9,000-byte cap, and the answer has to be assembled across two files.
+
+Measured 2026-11-11, same provider, same models, same checks, 8 tasks × 3 repeats = 24 runs
+per mode. Files read from `legacy-revive-lab/docs/` (`ERRORS.md`, `SERVICE-MAP.md`,
+`ENDPOINT-DB.md`, `API.md`, `FINDINGS.md`, `SPANS.md`, `INVENTORY.md`, `README.md`).
+
+| mode | success | spend | **cost per success** | retries | escalations |
+|---|---|---|---|---|---|
+| `cheap_only` | 23/24 | $0.007994 | **$0.000348** | 0 | 0 |
+| `retry_empty` | 24/24 | $0.007248 | **$0.000302** | 0 | 0 |
+| `retry_and_escalate` | 23/24 | $0.011516 | **$0.000501** | 2 | 1 |
+
+One cheap call on a file task: **1,294 prompt / 186 completion / $0.000304** — 1.8× the
+price of an evidence-in-prompt call, because the evidence is 10× bigger.
+One strong call: **1,230 prompt / 400 completion / $0.003522** — 11.6× the cheap call.
+
+## The escalation fired once, and it did not rescue anything
+
+The single escalation was on `r3-finding-vs-signature`, the one task written as a trap: the
+error catalogue attributes `538658668f` to a `NullPointerException`, no finding claims that
+signature, and the correct answer is "nothing links them". The cheap tier failed it, the
+strong tier was paid for, and the strong tier **also failed it** — with an empty reply,
+because it spent its whole 400-token budget and returned no content:
+
+```
+cheap     answer_mismatch   $0.0003
+strong    empty reply       $0.0035   <- 11.6x, no rescue
+```
+
+Cost per success in that mode is **66% higher than the retry-only mode**, for one fewer
+success. That is the whole argument for the repair order in one row.
+
+## What the search for a hard task actually found
+
+I expected multi-file joins to separate the tiers. They did not:
+
+- 23 of 24 cheap runs answered correctly across joins (`error signature → endpoint → caller
+  count`), a lookup across two maps (`4 statements / 3 recordings`), a two-hop count
+  (`which service owns the slowest call`), and arithmetic over a table (`324 ms / 5.3 ms
+  = 61×`, `107 of 120 lines against an 80% floor = 11 lines left`).
+- The only repeatable failure was **an empty reply** (3 of 24 cheap first attempts, 12.5%
+  here versus 5.1% in Part 1), and a same-tier retry fixed it every time.
+- The trap task is where the cheap tier's error was *semantic*, not arithmetic: it wanted
+  the tempting link ("NumberFormatException is a finding, so it must be the signature")
+  instead of the evidence.
+
+So the honest conclusion is not "escalation is useless". It is narrower and more useful:
+
+> **On this workload, escalation never paid for itself: 1 attempt in 156 runs across both
+> parts, 0 rescues, +66% cost per success.** The cheapest repair — retry the same tier when
+> the reply is empty — fixed everything that was fixable, at no extra price per success.
+
+## What would change my mind
+
+Escalation has to be measured on a task family where the cheap tier fails **deterministically
+and for a stated reason**: long-context counting over more than ~10k tokens, a join across
+three or more artifacts, or a constraint that has to be held across many steps. Until such a
+task exists in this repo, "escalate when a check fails" stays a policy I can price but cannot
+justify — and the docs should say that, not the reverse.
+
+## What this does not prove
+
+- 24 runs per mode. A 12.5% empty-reply rate is visible; a 2-run difference in success is not.
+- The byte cap truncates. `README.md` was cut at 9,000 bytes and still contained the two
+  numbers the task needed, but a task whose fact sits past the cap becomes a guess, and a
+  guess would look exactly like a model failure.
+- One repository, one day, one provider, off-peak prices.

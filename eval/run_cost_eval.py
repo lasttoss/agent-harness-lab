@@ -75,6 +75,8 @@ def main():
     ap.add_argument("--port", default="8123")
     ap.add_argument("--out", default="out/cost-eval.json")
     ap.add_argument("--daily-tokens", default="400000")
+    ap.add_argument("--repo", default="../legacy-revive-lab", help="repository the file-based tasks read from")
+    ap.add_argument("--max-bytes", type=int, default=9000, help="byte cap for concatenated file evidence")
     ap.add_argument("--repeats", type=int, default=1, help="runs per task per mode; >1 separates variance from effect")
     args = ap.parse_args()
 
@@ -94,9 +96,26 @@ def main():
         if not wait_health(proxy):
             raise SystemExit("proxy did not become healthy: " + (proc.stdout.read() if proc.stdout else ""))
         rows = []
+        repo = (ROOT / args.repo).resolve()
         for t in tasks:
             ev = ROOT / "out" / f"ev-{t['id']}.txt"
-            ev.write_text(t["evidence"])
+            if t.get("files"):
+                # No curated facts: the prompt is the file content, which is what a
+                # real task looks like. Truncation is by bytes and is reported, because
+                # a silently truncated file would turn a reading task into a guess.
+                chunks, used = [], 0
+                for rel in t["files"]:
+                    body = (repo / rel).read_text()
+                    room = args.max_bytes - used
+                    if room <= 0:
+                        chunks.append(f"\n--- {rel} --- (not included: byte cap reached)")
+                        continue
+                    clipped = body[:room]
+                    used += len(clipped)
+                    chunks.append(f"\n--- {rel} ---\n{clipped}")
+                ev.write_text("".join(chunks))
+            else:
+                ev.write_text(t["evidence"])
             for mode, escalate, retry_empty in MODES:
               for rep in range(1, args.repeats + 1):
                 out = ROOT / "out" / f"loop-{t['id']}-{mode}-r{rep}.json"

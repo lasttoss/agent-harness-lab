@@ -73,9 +73,15 @@ repair policies, 39 runs each:
 | + same-tier retry on empty reply | 39/39 | $0.000180 |
 | + strong-tier escalation | 39/39 | $0.000174 |
 
-The strong tier was never needed, and the cheapest repair (retry on an empty reply)
-fixed every failure it was spent on. Two of the findings are bugs in my own gate that
-only appeared when the harness was actually run.
+Part 2 gives the loop file paths instead of facts (prompt = real file content, 1,294 tokens
+per call): cheap-only 23/24 at $0.000348, retry on an empty reply 24/24 at $0.000302, and the
+one escalation it spent money on cost 11.6× a cheap call and **also failed the task**. Across
+both parts: 1 escalation in 156 runs, 0 rescues, +66% cost per success in the mode that
+escalated.
+
+The conclusion is written down instead of dressed up: the strong tier was never needed here,
+and the cheapest repair fixed everything that was fixable. Two of the findings are bugs in my
+own gate that only appeared when the harness was actually run.
 
 `make cost-eval-real` reruns it against the live provider; `make cost-eval` runs the same
 plumbing offline. Details and limits: [docs/COST-PER-TASK.md](docs/COST-PER-TASK.md).
