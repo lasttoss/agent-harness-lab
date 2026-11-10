@@ -1,3 +1,7 @@
 out/
 bin/
 *.log
+out/cost-eval*.json
+out/ev-*.txt
+out/loop-*-r*.json
+out/requests-cost-eval.jsonl

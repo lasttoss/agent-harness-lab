@@ -61,6 +61,25 @@ exhausted budget        -> HTTP 429 with a JSON error, never a silent spend
   written per request to `out/requests.jsonl`.
 - **Redaction**: keys, emails and phone numbers are stripped before anything is logged.
 
+## Cost per successful task
+
+A wrong answer costs money, so the harness prices each task instead of each token.
+13 questions about a real repository, an expectation regex written before the run, three
+repair policies, 39 runs each:
+
+| mode | success | cost per success |
+|---|---|---|
+| cheap only | 37/39 | $0.000197 |
+| + same-tier retry on empty reply | 39/39 | $0.000180 |
+| + strong-tier escalation | 39/39 | $0.000174 |
+
+The strong tier was never needed, and the cheapest repair (retry on an empty reply)
+fixed every failure it was spent on. Two of the findings are bugs in my own gate that
+only appeared when the harness was actually run.
+
+`make cost-eval-real` reruns it against the live provider; `make cost-eval` runs the same
+plumbing offline. Details and limits: [docs/COST-PER-TASK.md](docs/COST-PER-TASK.md).
+
 ## Measured numbers (real provider, not a fixture)
 
 - Repeat of a 3.7k-token prompt head: **3712 of 3734 tokens cached** on

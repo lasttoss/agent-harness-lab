@@ -1,0 +1,81 @@
+[
+  {
+    "id": "coverage-line",
+    "question": "What is the line coverage of the revived service, and what is the floor the build enforces? Answer in one sentence.",
+    "evidence": "revival: 20/20 tests. line coverage 89.2% (107/120). branch coverage 85.7% (12/14). method 84.5%. class 100%. The build fails under 80%.",
+    "expect": "89\\.2"
+  },
+  {
+    "id": "golden-count",
+    "question": "How many golden recordings were captured, and how many tests were generated from them?",
+    "evidence": "samples/golden holds a001..a020.json. kit/gen_tests.py generates one @Test per recording. mvn verify prints: Tests run: 20, Failures: 0.",
+    "expect": "20"
+  },
+  {
+    "id": "services-count",
+    "question": "How many services are in the system, and name them?",
+    "evidence": "The service map has 4 services: api-gateway, customer-svc, order-svc, report-svc. It has 7 observed caller-to-callee edges.",
+    "expect": "4"
+  },
+  {
+    "id": "edges-count",
+    "question": "How many caller-to-callee edges were observed, and how were they observed?",
+    "evidence": "7 edges, each one observed by the same trace id appearing in the access log, the RPC log and the SQL log. The system has 4 services.",
+    "expect": "7"
+  },
+  {
+    "id": "impact-keys",
+    "question": "How many impact keys does impact.json contain, and what kinds are they?",
+    "evidence": "impact.json has 12 keys: endpoint (4), service (4), table (4). Each key lists the recordings and endpoints it affects.",
+    "expect": "12"
+  },
+  {
+    "id": "error-signatures",
+    "question": "The error log produced how many events and how many distinct signatures?",
+    "evidence": "kit/errors.py read samples/error.log: 6 events, 4 distinct signatures, each signature with a fingerprint such as 538658668f.",
+    "expect": "4"
+  },
+  {
+    "id": "ratchet-baseline",
+    "question": "What number is stored in the coverage baseline file, and why did the gate fail on an unchanged build?",
+    "evidence": "The baseline file records 89.2%. The measured ratio was 107/120 = 0.891666..., so comparing raw floats made an unchanged build fail. The fix compares at the precision the baseline was written with.",
+    "expect": "89\\.2"
+  },
+  {
+    "id": "unmapped-rule",
+    "question": "When a changed file cannot be mapped to any endpoint, what does the impact report say?",
+    "evidence": "The report prints the file under UNMAPPED with the reason it could not be mapped. It never answers that a change has no impact: an unmapped file is an unknown, not a no.",
+    "expect": "(?i)unmapped"
+  },
+  {
+    "id": "advisor-scope",
+    "question": "What is the AI advisor allowed to claim, and what happens to a suggestion that cites a path that does not exist?",
+    "evidence": "The advisor output is labelled advisory, not evidence. Two guards run on it: every citation must be a path that exists, and every number must appear in the evidence pack. A suggestion that fails a guard is dropped and reported.",
+    "expect": "(?i)advisory"
+  },
+  {
+    "id": "prompt-size",
+    "question": "How large is the advisor prompt, in characters and in tokens?",
+    "evidence": "kit/advise.py --check-prompt reports 9/9 checks pass, prompt: 2672 chars, about 668 tokens. The measured cold call cost is not part of this answer.",
+    "expect": "2672|668"
+  },
+  {
+    "id": "inbound-customer-svc",
+    "question": "How many of the observed edges point into customer-svc, and from which services?",
+    "evidence": "api-gateway -> customer-svc: GET /api/customers/{id}. customer-svc -> order-svc: none. order-svc -> customer-svc: GET /api/customers/{id}. report-svc -> customer-svc: GET /api/customers/{id}. api-gateway -> order-svc, api-gateway -> report-svc, report-svc -> order-svc are the other edges. There are 7 edges in total.",
+    "expect": "3"
+  },
+  {
+    "id": "non-gateway-edges",
+    "question": "How many edges do not start at api-gateway?",
+    "evidence": "The service map has 7 edges: api-gateway->customer-svc (GET /api/customers/{id}), api-gateway->order-svc (GET /api/orders/{id}), api-gateway->order-svc (POST /api/orders), api-gateway->report-svc (GET /api/reports/top), order-svc->customer-svc, report-svc->customer-svc, report-svc->order-svc. 4 services.",
+    "expect": "3"
+  },
+  {
+    "id": "table-share",
+    "question": "What share of the impact keys are tables, as a percentage?",
+    "evidence": "impact.json: endpoint keys 4, service keys 4, table keys 4, 12 keys total. Each key lists the recordings it affects.",
+    "expect": "(?i)(33|one third|4 of 12|4/12)",
+    "derived": true
+  }
+]

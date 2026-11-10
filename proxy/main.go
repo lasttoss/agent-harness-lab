@@ -46,6 +46,8 @@ var (
 	seenPrefix = map[string]bool{}
 	ledger     *Ledger
 	prices     Prices
+	byModel    map[string]ModelPrice
+	upstream   *Upstream
 	logPath    string
 	fixture    string
 )
@@ -103,8 +105,19 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	mu.Unlock()
 
 	provider := env("HARNESS_PROVIDER", "fixture")
+	price := PriceFor(byModel, prices, req.Model)
 	var resp ChatResponse
-	if provider == "fixture" {
+	var upUsage upstreamUsage
+	if provider == "upstream" {
+		var err error
+		resp, upUsage, err = upstream.Complete(req)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadGateway)
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+	} else if provider == "fixture" {
 		b, err := os.ReadFile(fixture)
 		if err != nil {
 			http.Error(w, "fixture missing", http.StatusInternalServerError)
@@ -118,13 +131,24 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotImplemented)
-		_ = json.NewEncoder(w).Encode(map[string]string{"error": "upstream mode lands in phase 2"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"error": "provider must be fixture or upstream"})
 		return
 	}
 
 	completionTokens := len(resp.Choices[0].Message.Content) / 4
+	if provider == "upstream" {
+		// Trust the provider's own counts, including the cached part: this is the
+		// number the invoice is built from.
+		if upUsage.PromptTokens > 0 {
+			promptTokens = upUsage.PromptTokens
+		}
+		if upUsage.CompletionTokens > 0 {
+			completionTokens = upUsage.CompletionTokens
+		}
+		cached = upUsage.PromptTokensDetails.CachedTokens
+	}
 	resp.Usage = Usage{PromptTokens: promptTokens, CompletionTokens: completionTokens, CacheReadInputTokens: cached}
-	cost := Cost(prices, promptTokens, cached, completionTokens)
+	cost := Cost(price, promptTokens, cached, completionTokens)
 
 	mu.Lock()
 	seenPrefix[fp] = true
@@ -158,6 +182,15 @@ func main() {
 	logPath = env("HARNESS_LOG", "out/requests.jsonl")
 	fixture = env("HARNESS_FIXTURE", "proxy/fixtures/response.json")
 	daily, _ := strconv.Atoi(env("HARNESS_DAILY_TOKENS", "200000"))
+	byModel = LoadModelPrices(env("HARNESS_MODELS", "config/models.json"))
+	if env("HARNESS_PROVIDER", "fixture") == "upstream" {
+		up, err := LoadUpstream()
+		if err != nil {
+			log.Fatalf("provider=upstream but %v", err)
+		}
+		upstream = up
+		log.Printf("upstream mode: %s (max_tokens=%d)", up.URL, up.MaxTok)
+	}
 	ledger = LoadLedger(env("HARNESS_BUDGET", "out/budget.json"), daily)
 
 	http.HandleFunc("/v1/chat/completions", handle)

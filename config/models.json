@@ -1,0 +1,26 @@
+{
+  "deepseek-v4.1-flash": {
+    "tier": "cheap",
+    "input_per_mtok": 0.15,
+    "cached_input_per_mtok": 0.003,
+    "output_per_mtok": 1.5,
+    "measured_cold_usd": 0.000584,
+    "measured_prompt_tokens": 3734
+  },
+  "glm-5.3-flash": {
+    "tier": "cheap",
+    "input_per_mtok": 0.15,
+    "cached_input_per_mtok": 0.03,
+    "output_per_mtok": 0.5,
+    "measured_cold_usd": 0.000578,
+    "measured_prompt_tokens": 3717
+  },
+  "glm-5.3": {
+    "tier": "strong",
+    "input_per_mtok": 1.4,
+    "cached_input_per_mtok": 0.26,
+    "output_per_mtok": 4.5,
+    "measured_cold_usd": 0.00538,
+    "measured_prompt_tokens": 3717
+  }
+}
