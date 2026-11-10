@@ -1,0 +1,12 @@
+{
+  "id": "fixture-0001",
+  "model": "fixture",
+  "choices": [
+    {
+      "index": 0,
+      "message": { "role": "assistant", "content": "This is a fixture reply. It exists so the harness runs offline, with no API key and no network." },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": { "prompt_tokens": 0, "completion_tokens": 0, "cache_read_input_tokens": 0 }
+}

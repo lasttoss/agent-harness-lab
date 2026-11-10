@@ -1,0 +1,12 @@
+{
+  "default": {
+    "input_per_mtok": 0.15,
+    "cached_input_per_mtok": 0.003,
+    "output_per_mtok": 1.5
+  },
+  "cheap": {
+    "input_per_mtok": 0.05,
+    "cached_input_per_mtok": 0.001,
+    "output_per_mtok": 0.4
+  }
+}
