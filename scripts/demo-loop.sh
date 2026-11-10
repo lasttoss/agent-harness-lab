@@ -4,6 +4,7 @@
 # written down, instead of a run that "just ended".
 set -euo pipefail
 cd "$(dirname "$0")/.."
+mkdir -p out
 ADDR=":8098"
 rm -f out/loop.json out/loop-requests.jsonl out/loop-budget.json
 go build -o bin/harness ./proxy

@@ -6,6 +6,7 @@
 #   3. exhausted budget       -> HTTP 429 with a JSON error, never silent spend
 set -euo pipefail
 cd "$(dirname "$0")/.."
+mkdir -p out
 
 ADDR=":8099"
 LOG="out/smoke-requests.jsonl"
