@@ -53,6 +53,14 @@ exhausted budget        -> HTTP 429 with a JSON error, never a silent spend
   written per request to `out/requests.jsonl`.
 - **Redaction**: keys, emails and phone numbers are stripped before anything is logged.
 
+## Measured numbers (real provider, not a fixture)
+
+- Repeat of a 3.7k-token prompt head: **3712 of 3734 tokens cached** on
+  deepseek-v4.1-flash, **93.4% cheaper per call**; glm-5.3 78.7%; glm-5.3-flash 75.8%.
+- Prepending one timestamp dropped cached tokens to **0** on all three models.
+
+Method, prices and caveats: `docs/COST-MEASURED.md`.
+
 ## Design rules
 
 1. Offline by default. CI never calls a model; it replays fixtures.
