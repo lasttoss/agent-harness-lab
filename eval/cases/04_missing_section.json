@@ -1,0 +1,10 @@
+{
+  "id": "missing-section",
+  "expect": "reject",
+  "why": "no falsification section, so the reader cannot test the claim",
+  "evidence": {
+    "numbers": ["20", "89.2"],
+    "files": ["docs/API.md"]
+  },
+  "answer": "## Finding\n20 recordings pass and coverage is 89.2%.\n\n## Evidence\nSee docs/API.md.\n\n## Confidence\nHigh.\n"
+}

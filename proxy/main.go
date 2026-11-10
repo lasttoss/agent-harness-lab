@@ -144,6 +144,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Harness-Provider", provider)
+	w.Header().Set("X-Harness-Cost-Usd", fmt.Sprintf("%.8f", cost))
 	w.Header().Set("X-Harness-Cache-Read", fmt.Sprint(cached))
 	w.Header().Set("X-Harness-Prefix-Stable", fmt.Sprint(len(warns) == 0))
 	if len(warns) > 0 {

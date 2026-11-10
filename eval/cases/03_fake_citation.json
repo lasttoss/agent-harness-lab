@@ -1,0 +1,10 @@
+{
+  "id": "fake-citation",
+  "expect": "reject",
+  "why": "cites a file that does not exist, which reads as proof but is not",
+  "evidence": {
+    "numbers": ["20", "89.2"],
+    "files": ["kit/gen_tests.py", "docs/API.md"]
+  },
+  "answer": "## Finding\nCoverage is 89.2% and 20 recordings pass.\n\n## Evidence\nSee kit/never_existed.py and docs/API.md.\n\n## Confidence\nHigh.\n\n## What would change my mind\nA failing recording.\n"
+}

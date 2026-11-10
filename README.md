@@ -27,6 +27,11 @@ make test     # unit tests
 make smoke    # end-to-end: cache reuse, prefix guard, budget stop
 ```
 
+`make eval` runs the three gates against six cases: four must be rejected, two accepted.
+
+`make demo-loop` starts the proxy and the layer-1 loop on top of it, then proves the
+loop stops with a written reason instead of quietly overspending.
+
 `make smoke` starts the proxy in fixture mode, sends the same request twice, then a
 request with a date in the system prompt, then exhausts a tiny budget. Expected:
 
@@ -58,9 +63,11 @@ exhausted budget        -> HTTP 429 with a JSON error, never a silent spend
 
 ## Status
 
-- Phase 1 (proxy + guard + budget + cost + tests + smoke): done
-- Phase 2 (CI gates with planted bugs, eval runner): next
-- Phase 3 (minimal runtime loop with per-step budget): after that
+- Phase 1 (proxy: guard, budget, cost, redaction, request log): done
+- Phase 2 (gates: unsourced number, fake citation, missing falsification section;
+  eval runner with 6 accept/reject cases): done, `make eval`
+- Phase 3 (minimal loop with step and total token ceilings, written stop reason): done,
+  `make demo-loop`
 
 ## Licence
 

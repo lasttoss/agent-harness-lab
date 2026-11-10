@@ -1,0 +1,10 @@
+{
+  "id": "hallucinated-number",
+  "expect": "reject",
+  "why": "the model invented a percentage that nobody measured",
+  "evidence": {
+    "numbers": ["20", "89.2", "0.892"],
+    "files": ["kit/gen_tests.py", "docs/API.md"]
+  },
+  "answer": "## Finding\nThe refactor reduces review time by 40%.\n\n## Evidence\n20 golden recordings pass; coverage 89.2% per docs/API.md.\n\n## Confidence\nHigh.\n\n## What would change my mind\nA slower review cycle.\n"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "comma-decimal",
+  "expect": "accept",
+  "why": "89,2 is the same quantity as 89.2; locale must not fail a true claim",
+  "evidence": {
+    "numbers": ["20", "89.2"],
+    "files": ["docs/API.md"]
+  },
+  "answer": "## Finding\n20 recordings pass; line coverage is 89,2 percent.\n\n## Evidence\ndocs/API.md lists the endpoints covered.\n\n## Confidence\nHigh.\n\n## What would change my mind\nA recording that fails.\n"
+}

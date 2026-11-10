@@ -1,0 +1,10 @@
+{
+  "id": "wrong-number",
+  "expect": "reject",
+  "why": "95 is plausible and false: the pack says 89.2",
+  "evidence": {
+    "numbers": ["20", "89.2"],
+    "files": ["docs/API.md"]
+  },
+  "answer": "## Finding\nLine coverage is 95 percent.\n\n## Evidence\n20 recordings pass; docs/API.md.\n\n## Confidence\nHigh.\n\n## What would change my mind\nA failing recording.\n"
+}

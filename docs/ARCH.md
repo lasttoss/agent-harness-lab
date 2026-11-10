@@ -37,3 +37,15 @@ believed, because it does not depend on the agent telling the truth about itself
 - No model training, no fine-tuning, no prompt marketplace.
 - No hidden retries that mask provider failure.
 - No "AI writes the numbers" path anywhere in build.
+
+## Measured behaviour of the boundary (what the smoke tests show)
+
+- Repeat of the same prompt head: `cache_read_tokens` goes 0 -> same as prompt tokens.
+  In the request log the second line carries a non-zero `cache_read_tokens`.
+- A date, clock time, UUID, commit SHA, unix timestamp or absolute path inside the
+  first 2000 bytes: `X-Harness-Prefix-Stable: false` and `cache_read_tokens` back to 0,
+  because the cache key no longer matches.
+- Prompt shorter than the guard window: every step in a growing transcript is a miss,
+  because appending to the transcript changes the head itself. This is a property of
+  the measurement window, not a bug; long system prompts are what make caching pay.
+- Budget exhausted: HTTP 429 with a JSON error, and no request is forwarded.
