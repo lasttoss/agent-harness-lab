@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- diagram-meta {"sources":["proxy/main.go","proxy/prefix.go","proxy/budget.go","cmd/loop/main.go","gates/number_check.py","gates/citation_check.py","gates/section_check.py","eval/run_eval.py","docs/COST-MEASURED.md"]} -->
+<head>
+<meta charset="utf-8">
+<title>Three layers of an agent harness</title>
+<style>
+  :root{
+    --paper:#f5f5f5; --paper-2:#ececec; --ink:#2d3142; --muted:#4f5d75; --soft:#7a8399;
+    --rule:rgba(45,49,66,0.12); --rule-solid:#bfc0c0; --accent:#eb6c36;
+    --accent-tint:rgba(235,108,54,0.08);
+  }
+  html,body{margin:0;background:var(--paper);}
+  body{padding:40px;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);}
+  figure{margin:0;max-width:1040px;}
+  figcaption{margin-top:18px;font-size:13px;line-height:1.55;color:var(--muted);max-width:84ch;}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;}
+</style>
+</head>
+<body>
+<figure>
+<svg id="tiers" viewBox="0 0 960 470" width="960" height="470" role="img" aria-labelledby="t d">
+  <title id="t">Three layers of an agent harness: the loop owns the prompt, the proxy owns cost and limits, the gates own the truth</title>
+  <desc id="d">Left column names who changes each layer. The loop calls the proxy, the proxy forwards to a provider, and answers are checked by gates before anyone ships them. Control flows down; evidence flows up. The gates are the only place allowed to say an answer is wrong.</desc>
+
+  <rect x="0" y="0" width="960" height="470" fill="var(--paper)"/>
+
+  <!-- column headers -->
+  <text x="24" y="30" font-size="11.5" letter-spacing="0.09em" fill="var(--soft)" class="mono">OWNER</text>
+  <text x="196" y="30" font-size="11.5" letter-spacing="0.09em" fill="var(--soft)" class="mono">LAYER</text>
+  <text x="596" y="30" font-size="11.5" letter-spacing="0.09em" fill="var(--soft)" class="mono">WHAT IT DECIDES</text>
+  <line x1="24" y1="40" x2="936" y2="40" stroke="var(--rule)" stroke-width="1"/>
+
+  <!-- tier 1 -->
+  <text x="24" y="86" font-size="12.5" font-weight="600" fill="var(--muted)">whoever builds the runtime</text>
+  <text x="24" y="104" font-size="11" fill="var(--soft)">changes weekly</text>
+  <g>
+    <rect x="196" y="60" width="368" height="62" rx="3" fill="var(--paper-2)" stroke="var(--rule-solid)"/>
+    <text x="212" y="82" font-size="12.5" font-weight="600" class="mono">1 · inside the loop</text>
+    <text x="212" y="101" font-size="11" fill="var(--muted)">cmd/loop &nbsp;·&nbsp; prompt, tool schemas, retry, per-step budget</text>
+  </g>
+  <text x="596" y="86" font-size="11.5" fill="var(--muted)">model per step, token ceiling per step,</text>
+  <text x="596" y="103" font-size="11.5" fill="var(--muted)">when to stop and why</text>
+
+  <!-- tier 2 -->
+  <text x="24" y="176" font-size="12.5" font-weight="600" fill="var(--muted)">platform team</text>
+  <text x="24" y="194" font-size="11" fill="var(--soft)">changes monthly</text>
+  <g>
+    <rect x="196" y="150" width="368" height="62" rx="3" fill="var(--paper-2)" stroke="var(--rule-solid)"/>
+    <text x="212" y="172" font-size="12.5" font-weight="600" class="mono">2 · the tool boundary</text>
+    <text x="212" y="191" font-size="11" fill="var(--muted)">proxy &nbsp;·&nbsp; budget, cost, prefix guard, redaction, log</text>
+  </g>
+  <text x="596" y="176" font-size="11.5" fill="var(--muted)">may this call happen, at what price,</text>
+  <text x="596" y="193" font-size="11.5" fill="var(--muted)">and what is written down afterwards</text>
+
+  <!-- tier 3, focal -->
+  <text x="24" y="266" font-size="12.5" font-weight="600" fill="var(--muted)">whoever owns correctness</text>
+  <text x="24" y="284" font-size="11" fill="var(--soft)">changes never</text>
+  <g>
+    <rect x="196" y="240" width="368" height="62" rx="3" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4"/>
+    <text x="212" y="262" font-size="12.5" font-weight="600" class="mono" fill="var(--accent)">3 · outside the loop</text>
+    <text x="212" y="281" font-size="11" fill="var(--muted)">gates + CI &nbsp;·&nbsp; unsourced number, fake citation, no falsification</text>
+  </g>
+  <text x="596" y="266" font-size="11.5" fill="var(--muted)">whether the answer is allowed to ship,</text>
+  <text x="596" y="283" font-size="11.5" fill="var(--muted)">and it is the only layer that can say no</text>
+
+  <!-- flow down: control -->
+  <line x1="380" y1="122" x2="380" y2="146" stroke="var(--muted)" stroke-width="1.4"/>
+  <polygon points="380,154 375,144 385,144" fill="var(--muted)"/>
+  <text x="394" y="142" font-size="10.5" fill="var(--soft)" class="mono">request + budget</text>
+
+  <line x1="380" y1="212" x2="380" y2="236" stroke="var(--muted)" stroke-width="1.4"/>
+  <polygon points="380,244 375,234 385,234" fill="var(--muted)"/>
+  <text x="394" y="232" font-size="10.5" fill="var(--soft)" class="mono">answer + usage</text>
+
+  <!-- provider -->
+  <g>
+    <rect x="700" y="150" width="236" height="62" rx="3" fill="none" stroke="var(--rule-solid)" stroke-dasharray="4 3"/>
+    <text x="716" y="172" font-size="12.5" font-weight="600" class="mono">provider</text>
+    <text x="716" y="191" font-size="11" fill="var(--muted)">not owned, not trusted</text>
+  </g>
+  <line x1="564" y1="181" x2="694" y2="181" stroke="var(--muted)" stroke-width="1.4"/>
+  <polygon points="700,181 690,176 690,186" fill="var(--muted)"/>
+
+  <!-- evidence up -->
+  <line x1="330" y1="240" x2="330" y2="126" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <text x="118" y="330" font-size="11" fill="var(--soft)" class="mono">control flows down</text>
+  <text x="118" y="348" font-size="11" fill="var(--soft)" class="mono">evidence flows up</text>
+
+  <line x1="24" y1="392" x2="936" y2="392" stroke="var(--rule)" stroke-width="1"/>
+  <text x="24" y="414" font-size="11.5" fill="var(--muted)" class="mono">measured: 3712/3734 tokens cached on a repeat · 93.4% cheaper per call · 6 volatility patterns · 6 gate cases</text>
+  <text x="24" y="434" font-size="11.5" fill="var(--muted)" class="mono">a CLI gives you layer 2 only — which is why a team can adopt it and a product cannot be built on it</text>
+</svg>
+<figcaption>Each layer has a different owner and a different change rate. The loop decides what to ask, the proxy decides whether the call may happen and at what cost, and the gates decide whether the answer is allowed to be believed. A closed CLI occupies the middle layer only: it can be adopted, but cost attribution and reproducibility stay out of reach.</figcaption>
+</figure>
+</body>
+</html>

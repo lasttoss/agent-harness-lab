@@ -20,6 +20,14 @@ builds the two layers a CLI cannot give you.
 A CLI sits in layer 2 only. That is why a team can adopt it, but a product cannot
 be built on it: cost and reproducibility live in layer 1.
 
+## The shape of it
+
+The figure answers one question: where control actually lives when a team uses an agent.
+
+![Three stacked layers: the loop, the proxy at the tool boundary, and the gates outside the loop](docs/figures/three-tiers.png)
+
+**Figure 1.** Each layer has a different owner and change rate: the loop decides what to ask, the proxy decides whether the call may happen and at what price, the gates decide whether the answer may be believed. Source: [`docs/figures/three-tiers.html`](docs/figures/three-tiers.html) — self-contained SVG, no remote assets.
+
 ## Quickstart (no API key, no network)
 
 ```bash
